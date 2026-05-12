@@ -66,11 +66,12 @@ OpenCode (OTEL spans) → LangfuseSpanProcessor → Langfuse Dashboard
 
 ## Environment Variables
 
-| Variable              | Required | Default                      | Description            |
-| --------------------- | -------- | ---------------------------- | ---------------------- |
-| `LANGFUSE_PUBLIC_KEY` | Yes      | -                            | Langfuse public key    |
-| `LANGFUSE_SECRET_KEY` | Yes      | -                            | Langfuse secret key    |
-| `LANGFUSE_BASEURL`    | No       | `https://cloud.langfuse.com` | Self-hosted instance   |
+| Variable                    | Required | Default                      | Description                                                                                                          |
+| --------------------------- | -------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_PUBLIC_KEY`       | Yes      | -                            | Langfuse public key                                                                                                  |
+| `LANGFUSE_SECRET_KEY`       | Yes      | -                            | Langfuse secret key                                                                                                  |
+| `LANGFUSE_BASEURL`          | No       | `https://cloud.langfuse.com` | Self-hosted instance                                                                                                 |
+| `LANGFUSE_DISPOSE_FLUSH_MS` | No       | `8000`                       | Bounded timeout (ms) for the final span flush when the OpenCode server is disposed; prevents Bun OTLP keep-alive hangs |
 
 ---
 

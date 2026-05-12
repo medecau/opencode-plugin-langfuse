@@ -3,6 +3,7 @@ import { LangfusePlugin } from "./index";
 
 const mockForceFlush = mock(() => Promise.resolve());
 const mockStart = mock(() => {});
+const mockShutdown = mock(() => Promise.resolve());
 
 mock.module("@langfuse/otel", () => ({
   LangfuseSpanProcessor: mock(() => ({
@@ -13,6 +14,7 @@ mock.module("@langfuse/otel", () => ({
 mock.module("@opentelemetry/sdk-node", () => ({
   NodeSDK: mock(() => ({
     start: mockStart,
+    shutdown: mockShutdown,
   })),
 }));
 
@@ -40,6 +42,7 @@ describe("LangfusePlugin", () => {
   beforeEach(() => {
     mockForceFlush.mockClear();
     mockStart.mockClear();
+    mockShutdown.mockClear();
     mockLog.mockClear();
   });
 
@@ -164,6 +167,37 @@ describe("LangfusePlugin", () => {
       } as any);
 
       expect(mockForceFlush).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("dispose hook", () => {
+    it("flushes (not shuts down) on server.instance.disposed", async () => {
+      setupEnv();
+      const hooks = await LangfusePlugin(mockPluginInput());
+
+      await hooks.event!({
+        event: { type: "server.instance.disposed", properties: {} },
+      } as any);
+
+      expect(mockForceFlush).toHaveBeenCalled();
+      expect(mockShutdown).not.toHaveBeenCalled();
+    });
+
+    it("respects LANGFUSE_DISPOSE_FLUSH_MS as an upper bound", async () => {
+      setupEnv({ LANGFUSE_DISPOSE_FLUSH_MS: "50" });
+      mockForceFlush.mockImplementationOnce(() => new Promise<void>(() => {}));
+
+      const hooks = await LangfusePlugin(mockPluginInput());
+
+      const start = Date.now();
+      await hooks.event!({
+        event: { type: "server.instance.disposed", properties: {} },
+      } as any);
+      const elapsed = Date.now() - start;
+
+      expect(mockForceFlush).toHaveBeenCalled();
+      expect(mockShutdown).not.toHaveBeenCalled();
+      expect(elapsed).toBeLessThan(500);
     });
   });
 

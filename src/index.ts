@@ -51,7 +51,16 @@ export const LangfusePlugin: Plugin = async ({ client }) => {
         await processor.forceFlush(); // Flushes the trace to Langfuse
       }
 
-      if (event.type === "server.instance.disposed") await sdk.shutdown(); // Flushes the trace to Langfuse
+      if (event.type === "server.instance.disposed") {
+        // sdk.shutdown() can hang under Bun when OTLP keep-alive sockets linger
+        // (oven-sh/bun#13184). Use a bounded forceFlush instead; no sdk.shutdown.
+        const ms = Number(process.env.LANGFUSE_DISPOSE_FLUSH_MS ?? "8000");
+        log("info", `Flushing OTEL on server.instance.disposed (max ${ms}ms)`);
+        await Promise.race([
+          processor.forceFlush(),
+          new Promise<void>((resolve) => setTimeout(resolve, ms)),
+        ]);
+      }
     },
   };
 };
