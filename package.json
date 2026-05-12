@@ -1,7 +1,7 @@
 {
-  "name": "opencode-plugin-langfuse",
-  "version": "0.1.8",
-  "description": "Langfuse observability plugin for OpenCode - LLM tracing, prompt versioning, and cost tracking",
+  "name": "@pdbr/opencode-plugin-langfuse",
+  "version": "2026.5.0",
+  "description": "Langfuse observability plugin for OpenCode - LLM tracing and cost tracking via OpenTelemetry",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -14,7 +14,6 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "bun run build",
     "prepare": "husky"
   },
   "keywords": [
@@ -25,14 +24,11 @@
     "tracing",
     "ai"
   ],
-  "author": "omercnet",
+  "author": "pdbr",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/omercnet/opencode-plugin-langfuse.git"
-  },
-  "publishConfig": {
-    "access": "public"
+    "url": "git+https://github.com/medecau/opencode-plugin-langfuse.git"
   },
   "dependencies": {
     "@langfuse/otel": "4.5.1",
@@ -41,8 +37,6 @@
     "@opentelemetry/sdk-trace-base": "^2.0.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.3.1",
-    "@commitlint/config-conventional": "^20.3.1",
     "@types/bun": "^1.3.5",
     "@types/node": "^22.19.5",
     "@typescript-eslint/eslint-plugin": "^8.52.0",

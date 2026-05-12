@@ -1,6 +1,6 @@
 # OpenCode Langfuse Plugin
 
-[![npm version](https://badge.fury.io/js/opencode-plugin-langfuse.svg)](https://www.npmjs.com/package/opencode-plugin-langfuse)
+[![npm version](https://badge.fury.io/js/@pdbr%2Fopencode-plugin-langfuse.svg)](https://www.npmjs.com/package/@pdbr/opencode-plugin-langfuse)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Automatic LLM observability for OpenCode using Langfuse via OpenTelemetry.**
@@ -12,9 +12,9 @@ Zero-config tracing of sessions, messages, tool calls, costs, and performance.
 ## Installation
 
 ```bash
-npm install opencode-plugin-langfuse
+bun add @pdbr/opencode-plugin-langfuse
 # or
-bun add opencode-plugin-langfuse
+npm install @pdbr/opencode-plugin-langfuse
 ```
 
 ---
@@ -44,7 +44,7 @@ In `.opencode/opencode.json`:
   "experimental": {
     "openTelemetry": true
   },
-  "plugin": ["opencode-plugin-langfuse"]
+  "plugin": ["@pdbr/opencode-plugin-langfuse"]
 }
 ```
 
@@ -94,14 +94,14 @@ See [Langfuse self-hosting docs](https://langfuse.com/docs/deployment/self-host)
 
 ### Plugin not loading
 
-- Ensure `opencode-plugin-langfuse` is in `dependencies` (not `devDependencies`)
+- Ensure `@pdbr/opencode-plugin-langfuse` is in `dependencies` (not `devDependencies`)
 - Verify `.opencode/opencode.json` syntax
 
 ---
 
 ## License
 
-MIT © omercnet
+MIT © pdbr
 
 ---
 
