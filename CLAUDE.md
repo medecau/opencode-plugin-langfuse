@@ -21,7 +21,7 @@ One source file: `src/index.ts` (~57 lines). The default export is `LangfusePlug
 
 What the factory does, in order:
 
-1. Reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASEURL` (defaults to `https://cloud.langfuse.com`), `LANGFUSE_ENVIRONMENT` (defaults to `development`), `LANGFUSE_DISPOSE_FLUSH_MS` (defaults to `8000`) from `process.env`.
+1. Reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASEURL` (defaults to `https://cloud.langfuse.com`), `LANGFUSE_ENVIRONMENT` (defaults to `development`), `LANGFUSE_DISPOSE_FLUSH_MS` (defaults to `8000`), `LANGFUSE_TRACE_ID` (32-hex, optional), `LANGFUSE_PARENT_OBSERVATION_ID` (16-hex, optional; requires `LANGFUSE_TRACE_ID`) from `process.env`.
 2. If public or secret key is missing, logs a warning and returns `{}` — **no SDK is started.** This is the "tracing disabled" path.
 3. Otherwise constructs a `LangfuseSpanProcessor` and starts a `NodeSDK` imperatively via `sdk.start()`. This runs *once* at plugin load — do not move it into a hook.
 4. Returns:

@@ -62,16 +62,36 @@ This plugin initializes a `LangfuseSpanProcessor` that captures all OpenTelemetr
 OpenCode (OTEL spans) → LangfuseSpanProcessor → Langfuse Dashboard
 ```
 
+### Trace stitching
+
+When OpenCode is invoked as a sub-step of a larger AI workflow, you can stitch its spans into the caller's existing Langfuse trace by setting two environment variables before launching `opencode`:
+
+- `LANGFUSE_TRACE_ID` (32-char hex) — reuse this trace ID for all spans the plugin emits.
+- `LANGFUSE_PARENT_OBSERVATION_ID` (16-char hex, requires the above) — nest every root span under this parent observation.
+
+```
+caller's trace ──┐
+                 └── parent observation
+                       └── OpenCode session
+                             ├── tool: read
+                             ├── tool: edit
+                             └── llm: generation
+```
+
+Design ported from upstream PR `omercnet/opencode-plugin-langfuse#17`.
+
 ---
 
 ## Environment Variables
 
-| Variable                    | Required | Default                      | Description                                                                                                          |
-| --------------------------- | -------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `LANGFUSE_PUBLIC_KEY`       | Yes      | -                            | Langfuse public key                                                                                                  |
-| `LANGFUSE_SECRET_KEY`       | Yes      | -                            | Langfuse secret key                                                                                                  |
-| `LANGFUSE_BASEURL`          | No       | `https://cloud.langfuse.com` | Self-hosted instance                                                                                                 |
-| `LANGFUSE_DISPOSE_FLUSH_MS` | No       | `8000`                       | Bounded timeout (ms) for the final span flush when the OpenCode server is disposed; prevents Bun OTLP keep-alive hangs |
+| Variable                         | Required | Default                      | Description                                                                                                            |
+| -------------------------------- | -------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `LANGFUSE_PUBLIC_KEY`            | Yes      | -                            | Langfuse public key                                                                                                    |
+| `LANGFUSE_SECRET_KEY`            | Yes      | -                            | Langfuse secret key                                                                                                    |
+| `LANGFUSE_BASEURL`               | No       | `https://cloud.langfuse.com` | Self-hosted instance                                                                                                   |
+| `LANGFUSE_DISPOSE_FLUSH_MS`      | No       | `8000`                       | Bounded timeout (ms) for the final span flush when the OpenCode server is disposed; prevents Bun OTLP keep-alive hangs |
+| `LANGFUSE_TRACE_ID`              | No       | -                            | 32-char hex; reuse this trace ID for all spans (caller-set)                                                            |
+| `LANGFUSE_PARENT_OBSERVATION_ID` | No       | -                            | 16-char hex; nest spans under this parent observation (caller-set, requires `LANGFUSE_TRACE_ID`)                       |
 
 ---
 
