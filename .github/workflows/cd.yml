@@ -15,6 +15,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Verify tag is signed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          REF=$(gh api "repos/$GITHUB_REPOSITORY/git/refs/tags/$GITHUB_REF_NAME")
+          OBJECT_TYPE=$(jq -r .object.type <<<"$REF")
+          OBJECT_SHA=$(jq -r .object.sha <<<"$REF")
+          if [ "$OBJECT_TYPE" != "tag" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME is lightweight (object type: $OBJECT_TYPE). Releases require an annotated, signed tag — recreate with: git tag -s $GITHUB_REF_NAME -m \"Release $GITHUB_REF_NAME\""
+            exit 1
+          fi
+          VERIFICATION=$(gh api "repos/$GITHUB_REPOSITORY/git/tags/$OBJECT_SHA" --jq .verification)
+          VERIFIED=$(jq -r .verified <<<"$VERIFICATION")
+          REASON=$(jq -r .reason <<<"$VERIFICATION")
+          if [ "$VERIFIED" != "true" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME failed signature verification (reason: $REASON). Recreate with: git tag -s $GITHUB_REF_NAME -m \"Release $GITHUB_REF_NAME\""
+            exit 1
+          fi
+          echo "Tag $GITHUB_REF_NAME verified by GitHub (reason: $REASON)."
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
