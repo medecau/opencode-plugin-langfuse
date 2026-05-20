@@ -1,0 +1,38 @@
+name: Dependency submission
+
+# Teaches GitHub's dependency graph about our transitive dependencies.
+# Source of truth is `bun.lock`, which GitHub does not parse, so without this
+# workflow only the ~13 top-level entries from `package.json` appear in the
+# graph and Dependabot can't alert on transitive CVEs.
+#
+# Strategy: generate an npm `package-lock.json` ephemerally in CI (the working
+# tree's `bun.lock` is untouched) and submit it via GitHub's Dependency
+# Submission API. The generated lockfile is never committed.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Mondays at 04:30 UTC — picks up newly published CVEs against the same
+    # transitive set even when we haven't pushed.
+    - cron: "30 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  submit:
+    name: Submit dependency snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "24"
+      - name: Generate npm lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Submit snapshot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/submit-npm-snapshot.mjs package-lock.json
