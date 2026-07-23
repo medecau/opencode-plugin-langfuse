@@ -25,7 +25,7 @@ const lockPath = process.argv[2] ?? "package-lock.json";
 const lock = JSON.parse(readFileSync(lockPath, "utf8"));
 if ((lock.lockfileVersion ?? 0) < 2) {
   throw new Error(
-    `Need lockfileVersion >= 2; got ${lock.lockfileVersion} from ${lockPath}`,
+    `Need lockfileVersion >= 2; got ${lock.lockfileVersion} from ${lockPath}`
   );
 }
 
@@ -85,23 +85,20 @@ const snapshot = {
 };
 
 console.log(
-  `Submitting snapshot for ${REPO} @ ${SHA.slice(0, 7)} (${Object.keys(resolved).length} packages)`,
+  `Submitting snapshot for ${REPO} @ ${SHA.slice(0, 7)} (${Object.keys(resolved).length} packages)`
 );
 
-const res = await fetch(
-  `${API}/repos/${REPO}/dependency-graph/snapshots`,
-  {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      "Content-Type": "application/json",
-      "User-Agent": "opencode-plugin-langfuse-dep-submission",
-    },
-    body: JSON.stringify(snapshot),
+const res = await fetch(`${API}/repos/${REPO}/dependency-graph/snapshots`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${TOKEN}`,
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+    "Content-Type": "application/json",
+    "User-Agent": "opencode-plugin-langfuse-dep-submission",
   },
-);
+  body: JSON.stringify(snapshot),
+});
 const body = await res.text();
 if (!res.ok) {
   throw new Error(`Snapshot submission failed: HTTP ${res.status}\n${body}`);

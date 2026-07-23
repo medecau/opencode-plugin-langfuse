@@ -1,0 +1,33 @@
+# Pre-push gate (tight-loops: the heavier gate — you're about to share code,
+# so the higher cost is justified). Sub-second autofix lives in pre-commit;
+# network-bound and slower checks live here.
+
+# 1. Security audit — block the push on any high+ advisory.
+#    Needs network; an offline push will be blocked (re-run when online, or
+#    bypass deliberately with `git push --no-verify`).
+#    Parked exception: GHSA-3jxr-9vmj-r5cp (brace-expansion ReDoS) is DEV-ONLY
+#    (eslint / typescript-eslint -> minimatch@3 -> brace-expansion), never
+#    shipped. The patched 1.1.16 is in-range, but bun does not support scoped
+#    overrides and a flat override would force the unrelated minimatch@10 onto
+#    brace-expansion@1.x. Re-evaluate — and drop this --ignore — on dep bumps.
+echo "pre-push: bun audit (high+) ..."
+if ! bun audit --audit-level=high --ignore=GHSA-3jxr-9vmj-r5cp; then
+  echo ""
+  echo "pre-push BLOCKED: bun audit found a high+ vulnerability."
+  echo "  Fix in-range:  bun update <pkg>   (bumps a direct dep)"
+  echo "  Fix a capped transitive: add a floor to package.json \"overrides\""
+  echo "                 (e.g. \"protobufjs\": \"^7.6.5\"), then bun install."
+  echo "  Then re-run:   bun audit"
+  echo "  If truly unfixable and low-risk, add --ignore=<GHSA> above with a reason."
+  exit 1
+fi
+
+# 2. Test suite (fast here; kept out of pre-commit so commits stay sub-second).
+echo "pre-push: bun test ..."
+if ! bun test; then
+  echo ""
+  echo "pre-push BLOCKED: tests failed. Reproduce with 'bun test'."
+  exit 1
+fi
+
+echo "pre-push: OK"
